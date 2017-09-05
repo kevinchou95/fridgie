@@ -316,6 +316,10 @@ public class MainActivity extends AppCompatActivity implements
         Cursor cursor = getAllItems();
         ArrayList<String> itemsList = new ArrayList<>();
 
+        if (cursor == null) {
+            return new String[0];
+        }
+
         while (cursor.moveToNext()) {
             itemsList.add(cursor.getString(0)); // TODO: 9/5/2017  WTFFFFF WHY IS THIS NOT INDEX_NAME
         }

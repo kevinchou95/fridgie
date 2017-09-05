@@ -227,7 +227,7 @@ public final class CustomDateUtils {
             case 0:
                 return context.getString(R.string.today);
             case 1:
-                return "Yesterday";
+                return context.getString(R.string.yesterday);
 
             default:
                 SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE, MMMM d");
