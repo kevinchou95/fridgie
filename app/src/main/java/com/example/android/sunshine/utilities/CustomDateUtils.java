@@ -200,7 +200,6 @@ public final class CustomDateUtils {
     public static String getReadableDateString(Context context, long timeInMillis) {
         int flags = DateUtils.FORMAT_SHOW_DATE
                 | DateUtils.FORMAT_SHOW_WEEKDAY;
-//        int flags = DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_YEAR;
 
         return DateUtils.formatDateTime(context, timeInMillis, flags);
     }

@@ -116,7 +116,8 @@ public class InstructionsActivity extends AppCompatActivity {
                 URLConnection connection = urls[0].openConnection();
                 connection.setRequestProperty("X-Mashape-Key", "TyzoL5wDIGmshTDH7Jccy4e88NJEp15YcuYjsnFbzup4sC4INc");
                 connection.setRequestProperty("Accept", "application/json");
-//// TODO: 9/2/2017 timeout/progress bar 
+
+                // TODO: 9/2/2017 timeout
                 InputStream is = connection.getInputStream();
                 BufferedReader rd = new BufferedReader(new InputStreamReader(is));
                 response = new StringBuilder(); // or StringBuffer if Java version 5+
