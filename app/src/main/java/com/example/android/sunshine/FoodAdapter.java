@@ -39,12 +39,6 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterViewHolder
     /* The context we use to utility methods, app resources and layout inflaters */
     private final Context mContext;
 
-    /*
-     * Below, we've defined an interface to handle clicks on items within this Adapter. In the
-     * constructor of our FoodAdapter, we receive an instance of a class that has implemented
-     * said interface. We store that instance in this variable to call the onClick method whenever
-     * an item is clicked in the list.
-     */
     final private FoodAdapterOnClickHandler mClickHandler;
 
     /**
@@ -108,37 +102,24 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterViewHolder
             return;
         }
 
-        /* Give a tag to this item in the list */
-//        long id = mCursor.getLong(mCursor.getColumnIndex(FoodContract.FoodEntry._ID));
-//        viewHolder.itemView.setTag(id);
-
         /* Read date from the cursor */
         long dateInMillis = mCursor.getLong(MainActivity.INDEX_DATE);
         int daysDifference =  CustomDateUtils.getDaysDifference(dateInMillis);
 
-        Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.circle_shape);
-        String daysText;
-
         int color;
         if (daysDifference == 0) {
             color = ContextCompat.getColor(mContext,R.color.colorL0);
-            daysText = "Today";
         } else if (daysDifference == 1) {
             color = ContextCompat.getColor(mContext,R.color.colorL1);
-            daysText = daysDifference + " day";
         } else if (daysDifference >= 2 && daysDifference <= 5) {
             color = ContextCompat.getColor(mContext,R.color.colorL2);
-            daysText = daysDifference + " days";
         } else {
             color = ContextCompat.getColor(mContext,R.color.colorL3);
-//            drawable.setColorFilter(ContextCompat.getColor(mContext,R.color.colorL3), PorterDuff.Mode.SRC_ATOP);
-            daysText = "A week";
         }
 
         /* Set Text Views in list */
         viewHolder.dayNum.setText(Integer.toString(daysDifference));
         viewHolder.dayNum.setCircleColor(color);
-//        viewHolder.dayCount.setText(daysText);
         viewHolder.foodName.setText(mCursor.getString(MainActivity.INDEX_NAME));
     }
 
@@ -200,11 +181,10 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterViewHolder
          */
         @Override
         public void onClick(View v) {
+
             int adapterPosition = getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
-//            long dateInMillis = mCursor.getLong(MainActivity.INDEX_DATE);
             String foodName = mCursor.getString(MainActivity.INDEX_NAME);
-//            mClickHandler.onClick(dateInMillis);
             mClickHandler.onClick(foodName);
         }
 

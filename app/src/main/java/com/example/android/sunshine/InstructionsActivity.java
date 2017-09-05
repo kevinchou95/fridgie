@@ -1,5 +1,6 @@
 package com.example.android.sunshine;
 
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
@@ -32,13 +33,6 @@ import me.drozdzynski.library.steppers.SteppersItem;
 import me.drozdzynski.library.steppers.SteppersView;
 
 public class InstructionsActivity extends AppCompatActivity {
-
-    private static final String URL_BASE =
-            "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/";
-    private static final String URL_SUFFIX_INSTRUCTIONS =
-            "/analyzedInstructions?stepBreakdown=true";
-    private static final String URL_SUFFIX_INGREDIENTS =
-            "/information?includeNutrition=false";
 
     private int id;
 
@@ -74,7 +68,7 @@ public class InstructionsActivity extends AppCompatActivity {
         mStepperView = (SteppersView) findViewById(R.id.steppersView);
         mLoading = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
-        id = getIntent().getExtras().getInt("recipe_id");
+        id = getIntent().getExtras().getInt(getResources().getString(R.string.extra_recipe_id));
 
         showLoading();
 
@@ -84,9 +78,11 @@ public class InstructionsActivity extends AppCompatActivity {
 
     private URL makeInstructionSearchQuery() {
 
+        Resources res = getResources();
         URL url = null;
         try {
-            url = new URL(URL_BASE + id + URL_SUFFIX_INSTRUCTIONS);
+            url = new URL(res.getString(R.string.url_base_get_instructions)
+                    + id + res.getString(R.string.url_suffix_instructions));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -95,9 +91,11 @@ public class InstructionsActivity extends AppCompatActivity {
 
     private URL makeIngredientsSearchQuery() {
 
+        Resources res = getResources();
         URL url = null;
         try {
-            url = new URL(URL_BASE + id + URL_SUFFIX_INGREDIENTS);
+            url = new URL(res.getString(R.string.url_base_get_instructions)
+                    + id + res.getString(R.string.url_suffix_ingredients));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -109,30 +107,37 @@ public class InstructionsActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(URL... urls) {
 
+            if (true) {
+                return FakeDataUtils.fakeInstructionResults();
+            } else {
+                StringBuilder response = null;
+                try {
 
-            StringBuilder response = null;
-            try {
+                    Resources res = getResources();
 
-                URLConnection connection = urls[0].openConnection();
-                connection.setRequestProperty("X-Mashape-Key", "TyzoL5wDIGmshTDH7Jccy4e88NJEp15YcuYjsnFbzup4sC4INc");
-                connection.setRequestProperty("Accept", "application/json");
+                    URLConnection connection = urls[0].openConnection();
+                    connection.setRequestProperty(res.getString(R.string.api_key_key),
+                            res.getString(R.string.api_key_value));
+                    connection.setRequestProperty(res.getString(R.string.api_accept_key),
+                            res.getString(R.string.api_accept_value));
 
-                // TODO: 9/2/2017 timeout
-                InputStream is = connection.getInputStream();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-                response = new StringBuilder(); // or StringBuffer if Java version 5+
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    response.append(line);
-                    response.append('\r');
+                    // TODO: 9/2/2017 timeout
+                    InputStream is = connection.getInputStream();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                    response = new StringBuilder(); // or StringBuffer if Java version 5+
+                    String line;
+                    while ((line = rd.readLine()) != null) {
+                        response.append(line);
+                        response.append('\r');
+                    }
+                    rd.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                rd.close();
 
-            } catch (IOException e) {
-                e.printStackTrace();
+                return response.toString();
             }
-
-            return response.toString();
         }
 
         @Override
@@ -256,7 +261,7 @@ public class InstructionsActivity extends AppCompatActivity {
                         JSONObject item = ingredients.getJSONObject(i);
                         displayInfo += "\n" +
                                 formatDouble(item.getDouble("amount")) + " " +
-                                item.getString("unitLong") +
+                                item.getString("unitLong") + " " +
                                 item.getString("name");
 
                     }

@@ -1,6 +1,7 @@
 package com.example.android.sunshine;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,10 +32,6 @@ import static com.example.android.sunshine.RecipeAdapter.*;
 
 public class RecipesActivity extends AppCompatActivity implements RecipeAdapterOnClickHandler {
 
-    private static final String URL_BASE =
-            "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/findByIngredients?fillIngredients=false&ingredients=";
-    private static final String URL_SUFFIX = "&ranking=2";
-
     private RecyclerView mRecyclerView;
     private RecipeAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -54,7 +51,7 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
         mRecyclerView.setAdapter(mAdapter);
         mLoading = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
-        mFoods = getIntent().getExtras().getStringArray("foods");
+        mFoods = getIntent().getExtras().getStringArray(getResources().getString(R.string.extra_foods));
 
         showLoading();
 
@@ -63,16 +60,18 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
 
     private URL makeSearchQuery() {
 
-        String urlString = URL_BASE;
+        Resources res = getResources();
+
+        String urlString = res.getString(R.string.url_base_get_recipes);
 
         if (mFoods.length >= 1) {
             urlString += mFoods[0];
         }
 
         for (int i = 1; i < mFoods.length; i++) {
-            urlString += "%2C" +  mFoods[i];
+            urlString += "%2C" + mFoods[i];
         }
-        urlString += URL_SUFFIX; // add option for 1=maximize used or 2=minimize missing
+        urlString += res.getString(R.string.url_suffix_get_recipes); // add option for 1=maximize used or 2=minimize missing
 
         URL url = null;
         try {
@@ -88,9 +87,19 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
     public void onClick(int id) {
 
         Intent instructionsIntent = new Intent(RecipesActivity.this, InstructionsActivity.class);
-        instructionsIntent.putExtra("recipe_id", id);
+        instructionsIntent.putExtra(getResources().getString(R.string.extra_recipe_id), id);
 
         startActivity(instructionsIntent);
+    }
+
+    private void showLoading() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mLoading.setVisibility(View.VISIBLE);
+    }
+
+    private void showData() {
+        mLoading.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
     }
 
     public class SpoonacularSearchTask extends AsyncTask<URL, Void, String> {
@@ -98,8 +107,6 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
         @Override
         protected String doInBackground(URL... urls) {
 
-
-//            if (getPreferences(MODE_PRIVATE).getString("test", "default").equals(true)) {
             // TODO: 9/2/2017 Get these test settings up
             if (true) {
                 return FakeDataUtils.fakeRecipeSearchResults();
@@ -108,9 +115,13 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
 
                 try {
 
+                    Resources res = getResources();
+
                     URLConnection connection = urls[0].openConnection();
-                    connection.setRequestProperty("X-Mashape-Key", "TyzoL5wDIGmshTDH7Jccy4e88NJEp15YcuYjsnFbzup4sC4INc");
-                    connection.setRequestProperty("Accept", "application/json");
+                    connection.setRequestProperty(res.getString(R.string.api_key_key),
+                            res.getString(R.string.api_key_value));
+                    connection.setRequestProperty(res.getString(R.string.api_accept_key),
+                            res.getString(R.string.api_accept_value));
 
                     InputStream is = connection.getInputStream();
                     BufferedReader rd = new BufferedReader(new InputStreamReader(is));
@@ -130,7 +141,6 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
             }
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         protected void onPostExecute(String recipeResult) {
 
@@ -148,15 +158,5 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
                 showData();
             }
         }
-    }
-
-    private void showLoading() {
-        mRecyclerView.setVisibility(View.INVISIBLE);
-        mLoading.setVisibility(View.VISIBLE);
-    }
-
-    private void showData() {
-        mLoading.setVisibility(View.INVISIBLE);
-        mRecyclerView.setVisibility(View.VISIBLE);
     }
 }

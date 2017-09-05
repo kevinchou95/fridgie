@@ -15,6 +15,7 @@
  */
 package com.example.android.sunshine;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -101,7 +102,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
         String name = null;
         String usedCount = null;
         String missedCount = null;
-        String imageUrl = "https://spoonacular.com/recipeImages/";
+        String imageUrl = null;
 
         try {
             JSONObject recipe = mRecipeResults.getJSONObject(position);

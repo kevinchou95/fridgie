@@ -16,7 +16,6 @@
 package com.example.android.sunshine;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,7 +32,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,7 +42,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.example.android.sunshine.data.FoodContract;
-import com.example.android.sunshine.data.AppPreferences;
 import com.example.android.sunshine.utilities.CustomDateUtils;
 
 import java.util.ArrayList;
@@ -94,10 +91,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_forecast);
-        getSupportActionBar().setElevation(0f);
+        setContentView(R.layout.activity_foods);
 
-//        FakeDataUtils.insertFakeData(this);
+        getSupportActionBar().setElevation(0f);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_forecast);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
@@ -106,13 +102,7 @@ public class MainActivity extends AppCompatActivity implements
         mRecipes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Intent recipeIntent = new Intent(MainActivity.this, RecipesActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putStringArray("foods", getItemsAsArray());
-                recipeIntent.putExtras(bundle);
-
-                startActivity(recipeIntent);
+                startRecipesActivity();
             }
         });
 
@@ -121,62 +111,7 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onClick(View view) {
-
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-                alertDialog.setTitle("Add Item");
-
-                final EditText input = new EditText(MainActivity.this);
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
-                input.setLayoutParams(lp);
-                alertDialog.setView(input);
-
-                alertDialog.setPositiveButton("Create",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                String nameToAdd = input.getText().toString().trim();
-
-                                if (!nameToAdd.equals("")) {
-                                    long date = CustomDateUtils.normalizeDate(System.currentTimeMillis());
-
-                                    if (getContentResolver().query(
-                                            FoodContract.FoodEntry.CONTENT_URI,
-                                            null,
-                                            FoodContract.FoodEntry.COLUMN_NAME + " = ? ",
-                                            new String[]{nameToAdd},
-                                            null).getCount() != 0) {
-
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                                        builder.setTitle("You already have this in the fridge!")
-                                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        dialog.dismiss();
-                                                    }
-                                                }).show();
-                                    } else {
-                                        ContentValues foodToAdd = new ContentValues();
-                                        foodToAdd.put(FoodContract.FoodEntry.COLUMN_NAME, nameToAdd);
-                                        foodToAdd.put(FoodContract.FoodEntry.COLUMN_DATE, date);
-
-                                        getContentResolver().bulkInsert(
-                                                FoodContract.FoodEntry.CONTENT_URI,
-                                                new ContentValues[]{foodToAdd});
-                                    }
-                                }
-                            }
-                        });
-
-                alertDialog.setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-
-                alertDialog.show();
+                startAddActivity();
             }
         });
 
@@ -212,6 +147,73 @@ public class MainActivity extends AppCompatActivity implements
         getSupportLoaderManager().initLoader(ID_FORECAST_LOADER, null, this);
     }
 
+    private void startRecipesActivity() {
+
+        Intent recipeIntent = new Intent(MainActivity.this, RecipesActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putStringArray(getResources().getString(R.string.extra_foods), getItemsAsArray());
+        recipeIntent.putExtras(bundle);
+
+        startActivity(recipeIntent);
+    }
+
+    private void startAddActivity() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+        alertDialog.setTitle("Add Item");
+
+        final EditText input = new EditText(MainActivity.this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton("Create",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String nameToAdd = input.getText().toString().trim();
+
+                        if (!nameToAdd.equals("")) {
+                            long date = CustomDateUtils.normalizeDate(System.currentTimeMillis());
+
+                            if (getContentResolver().query(
+                                    FoodContract.FoodEntry.CONTENT_URI,
+                                    null,
+                                    FoodContract.FoodEntry.COLUMN_NAME + " = ? ",
+                                    new String[]{nameToAdd},
+                                    null).getCount() != 0) {
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                                builder.setTitle("You already have this in the fridge!")
+                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        }).show();
+                            } else {
+                                ContentValues foodToAdd = new ContentValues();
+                                foodToAdd.put(FoodContract.FoodEntry.COLUMN_NAME, nameToAdd);
+                                foodToAdd.put(FoodContract.FoodEntry.COLUMN_DATE, date);
+
+                                getContentResolver().bulkInsert(
+                                        FoodContract.FoodEntry.CONTENT_URI,
+                                        new ContentValues[]{foodToAdd});
+                            }
+                        }
+                    }
+                });
+
+        alertDialog.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+    }
     /**
      * Called by the {@link android.support.v4.app.LoaderManagerImpl} when a new Loader needs to be
      * created. This Activity only uses one loader, so we don't necessarily NEED to check the
@@ -227,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements
         switch (loaderId) {
 
             case ID_FORECAST_LOADER:
-                /* URI for all rows of weather data in our weather table */
+                /* URI for all rows of data */
                 Uri foodQueryUri = FoodContract.FoodEntry.CONTENT_URI;
                 String sortOrder = FoodContract.FoodEntry.COLUMN_DATE + " ASC";
                 String selection = null;
@@ -274,10 +276,6 @@ public class MainActivity extends AppCompatActivity implements
      */
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        /*
-         * Since this Loader's data is now invalid, we need to clear the Adapter that is
-         * displaying the data.
-         */
         mFoodAdapter.swapCursor(null);
     }
 
@@ -319,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements
         ArrayList<String> itemsList = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            itemsList.add(cursor.getString(0)); // WTFFFFF WHY IS THIS NOT INDEX_NAME
+            itemsList.add(cursor.getString(0)); // TODO: 9/5/2017  WTFFFFF WHY IS THIS NOT INDEX_NAME
         }
 
         return itemsList.toArray(new String[itemsList.size()]);
