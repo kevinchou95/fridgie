@@ -44,6 +44,8 @@ public class RecipesActivity extends AppCompatActivity implements RecipeAdapterO
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipes);
 
+        getSupportActionBar().setTitle(getResources().getString(R.string.title_activity_recipes));
+
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_recipes);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);

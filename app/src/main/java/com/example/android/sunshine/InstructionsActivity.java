@@ -1,5 +1,7 @@
 package com.example.android.sunshine;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.design.widget.BottomSheetBehavior;
@@ -46,6 +48,8 @@ public class InstructionsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_instructions);
+
+        getSupportActionBar().setTitle(getResources().getString(R.string.title_activity_instructions));
 
         View bottomSheet = findViewById(R.id.bs_ingredients);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -169,20 +173,22 @@ public class InstructionsActivity extends AppCompatActivity {
                 @Override
                 public void onFinish() {
                     // Action on last step Finish button
+                    AlertDialog.Builder builder = new AlertDialog.Builder(InstructionsActivity.this);
+
+                    builder.setTitle("You did it!  Enjoy your meal!")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    finish();
+                                }
+                            }).show();
                 }
             });
 
             steppersViewConfig.setOnCancelAction(new OnCancelAction() {
                 @Override
                 public void onCancel() {
-                    finish(); // what to do about this?????????
-                }
-            });
-
-            steppersViewConfig.setOnChangeStepAction(new OnChangeStepAction() {
-                @Override
-                public void onChangeStep(int position, SteppersItem activeStep) {
-                    // Action when click continue on each step
+                    finish(); //todo what to do about this?????????
                 }
             });
 
@@ -220,29 +226,36 @@ public class InstructionsActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(URL... urls) {
 
-            return FakeDataUtils.fakeIngredientResults();
-//            StringBuilder response = null;
-//            try {
-//
-//                URLConnection connection = urls[0].openConnection();
-//                connection.setRequestProperty("X-Mashape-Key", "TyzoL5wDIGmshTDH7Jccy4e88NJEp15YcuYjsnFbzup4sC4INc");
-//                connection.setRequestProperty("Accept", "application/json");
-//
-//                InputStream is = connection.getInputStream();
-//                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-//                response = new StringBuilder(); // or StringBuffer if Java version 5+
-//                String line;
-//                while ((line = rd.readLine()) != null) {
-//                    response.append(line);
-//                    response.append('\r');
-//                }
-//                rd.close();
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            return response.toString();
+            if (true) {
+                return FakeDataUtils.fakeIngredientResults();
+            } else {
+                StringBuilder response = null;
+                try {
+
+                    Resources res = getResources();
+
+                    URLConnection connection = urls[0].openConnection();
+                    connection.setRequestProperty(res.getString(R.string.api_key_key),
+                            res.getString(R.string.api_key_value));
+                    connection.setRequestProperty(res.getString(R.string.api_accept_key),
+                            res.getString(R.string.api_accept_value));
+
+                    InputStream is = connection.getInputStream();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                    response = new StringBuilder(); // or StringBuffer if Java version 5+
+                    String line;
+                    while ((line = rd.readLine()) != null) {
+                        response.append(line);
+                        response.append('\r');
+                    }
+                    rd.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                return response.toString();
+            }
         }
 
         @Override
@@ -272,6 +285,7 @@ public class InstructionsActivity extends AppCompatActivity {
             mIngredients.setText(displayInfo);
         }
 
+        // removes trailing 0's in a String format
         private String formatDouble(double d) {
 
             if(d == (long) d) {

@@ -127,7 +127,7 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterViewHolder
      * This method simply returns the number of items to display. It is used behind the scenes
      * to help layout our Views and for animations.
      *
-     * @return The number of items available in our forecast
+     * @return The number of items available in our main
      */
     @Override
     public int getItemCount() {
@@ -153,7 +153,7 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterViewHolder
 
     /**
      * A RecipeAdapterViewHolder is a required part of the pattern for RecyclerViews. It mostly behaves as
-     * a cache of the child views for a forecast item. It's also a convenient place to set an
+     * a cache of the child views for a main item. It's also a convenient place to set an
      * OnClickListener, since it has access to the adapter and the views.
      */
     class FoodAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

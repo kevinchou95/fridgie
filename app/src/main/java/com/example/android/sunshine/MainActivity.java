@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int INDEX_NAME = 1;
 
     /*
-     * This ID will be used to identify the Loader responsible for loading our weather forecast. In
+     * This ID will be used to identify the Loader responsible for loading our weather main. In
      * some cases, one Activity can deal with many Loaders. However, in our case, there is only one.
      * We will still use this ID to initialize the loader and create the loader for best practice.
      * Please note that 44 was chosen arbitrarily. You can use whatever number you like, so long as
@@ -175,24 +175,10 @@ public class MainActivity extends AppCompatActivity implements
                         String nameToAdd = input.getText().toString().trim();
 
                         if (!nameToAdd.equals("")) {
-                            long date = CustomDateUtils.normalizeDate(System.currentTimeMillis());
+                            if (isUniqueFood(nameToAdd)) {
 
-                            if (getContentResolver().query(
-                                    FoodContract.FoodEntry.CONTENT_URI,
-                                    null,
-                                    FoodContract.FoodEntry.COLUMN_NAME + " = ? ",
-                                    new String[]{nameToAdd},
-                                    null).getCount() != 0) {
+                                long date = CustomDateUtils.normalizeDate(System.currentTimeMillis());
 
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                                builder.setTitle("You already have this in the fridge!")
-                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                            }
-                                        }).show();
-                            } else {
                                 ContentValues foodToAdd = new ContentValues();
                                 foodToAdd.put(FoodContract.FoodEntry.COLUMN_NAME, nameToAdd);
                                 foodToAdd.put(FoodContract.FoodEntry.COLUMN_DATE, date);
@@ -327,6 +313,28 @@ public class MainActivity extends AppCompatActivity implements
         return itemsList.toArray(new String[itemsList.size()]);
     }
 
+    private boolean isUniqueFood(String nameToAdd) {
+
+        if (getContentResolver().query(
+                FoodContract.FoodEntry.CONTENT_URI,
+                null,
+                FoodContract.FoodEntry.COLUMN_NAME + " = ? ",
+                new String[]{nameToAdd},
+                null).getCount() != 0) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+            builder.setTitle("You already have this in the fridge!")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+
+            return false;
+        }
+        return true;
+    }
     /**
      * This is where we inflate and set up the menu for this Activity.
      *
@@ -343,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements
         /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
         MenuInflater inflater = getMenuInflater();
         /* Use the inflater's inflate method to inflate our menu layout to this menu */
-        inflater.inflate(R.menu.forecast, menu);
+        inflater.inflate(R.menu.main, menu);
         /* Return true so that the menu is displayed in the Toolbar */
         return true;
     }
